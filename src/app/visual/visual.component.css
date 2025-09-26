@@ -1,0 +1,101 @@
+/* Full-bleed: ocupa todo el ancho del viewport */
+.full-bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  max-width: none !important;
+}
+html, body { overflow-x: hidden; }
+
+/* Página base */
+.page { padding: 24px; min-height: 100vh; box-sizing: border-box; }
+.header { display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.header-actions { display: flex; gap: 8px; }
+.action-button { background: #2196f3; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: background .3s; }
+.action-button:hover { background: #1976d2; }
+.back-button { background: #f44336; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; }
+
+/* Toolbar sticky */
+.toolbar.sticky{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.85);backdrop-filter:saturate(1.2) blur(6px);padding:8px 16px;margin:-8px 0 16px;border-radius:12px;display:flex;gap:12px;align-items:center}
+.brand{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:24ch}
+.tools{display:flex;gap:8px;align-items:center}
+.tools input[type="search"]{height:34px;border:1px solid #e0e0e0;border-radius:8px;padding:0 10px;min-width:200px}
+.progress{flex:1;height:8px;background:#eee;border-radius:8px;overflow:hidden}
+.progress .bar{height:100%;background:linear-gradient(90deg,#4caf50,#81c784)}
+
+/* Grid de semestres (horizontal, sin scroll) */
+.semesters.grid-wrap {
+  --card-min: 210px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min), 1fr));
+  gap: 14px;
+  padding: 0 16px 16px;
+}
+.semesters.compact { --card-min: 190px; }
+.semesters.ultra   { --card-min: 170px; }
+.semesters.dense   { --card-min: 180px; }
+
+@media (max-width: 900px) {
+  .semesters.grid-wrap { --card-min: 190px; }
+  .semesters.compact   { --card-min: 170px; }
+  .semesters.ultra     { --card-min: 150px; }
+}
+@media (max-width: 600px) {
+  .semesters.grid-wrap { --card-min: 170px; }
+  .semesters.compact   { --card-min: 150px; }
+  .semesters.ultra     { --card-min: 140px; }
+}
+
+/* Tarjetas */
+.semester-column {
+  scroll-snap-align: start;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #ececec;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+  padding: 12px;
+  min-width: 0;
+}
+.semester-header {
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.semester-header .sum{font-size:12px;opacity:.75;margin-top:4px}
+
+/* Lista de ramos */
+ul { margin: 0; padding: 0; list-style: none; }
+li {
+  padding: 8px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  font-size: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.08);
+  transition: background-color .2s, transform .08s ease;
+  cursor: pointer;
+}
+li:hover { background: #e3f2fd; }
+li:active{ transform: scale(.98); }
+li:focus{ outline: 2px solid #90caf9; outline-offset: 2px; }
+
+.row{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.dot{width:10px;height:10px;border-radius:50%;background:#bbdefb}
+li.done .dot{background:#66bb6a}
+li.locked .dot{background:#ef9a9a}
+.chip{font-size:12px;background:#f0f0f0;border-radius:999px;padding:2px 8px}
+
+.tachado, li.done { text-decoration: line-through; color: #888; background: #eee !important; box-shadow: none !important; }
+.disabled, li.locked { opacity: .6; pointer-events: auto; }  /* se puede clickear para mostrar hint */
+.hint{display:block;margin-top:4px;font-size:12px;opacity:.85;color:#e53935}
+
+/* Pickers/editores */
+.color-panel, .color-picker { margin-top: 4px; font-size: 12px; }
+.requisite-editor { margin-top: 4px; font-size: 12px; display: flex; flex-direction: column; max-width: 180px; }
+.background-editor { display: flex; align-items: center; gap: 8px; margin: 12px 0; }
+
+/* Loader */
+.loader { height: 100vh; display: flex; justify-content: center; align-items: center; }
+.spinner { border: 6px solid #f3f3f3; border-top: 6px solid #2196f3; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+@keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }

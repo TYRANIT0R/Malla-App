@@ -1,0 +1,133 @@
+<div class="loader" *ngIf="!loaded">
+  <div class="spinner"></div>
+</div>
+
+<div
+  class="page full-bleed"
+  *ngIf="loaded"
+  [ngStyle]="{
+    'background-color': backgroundColor,
+    'background-image': backgroundImageUrl ? 'url(' + backgroundImageUrl + ')' : 'none',
+    'background-size': 'cover',
+    'background-repeat': 'no-repeat',
+    'background-attachment': 'fixed'
+  }"
+>
+  <!-- Header superior -->
+  <div class="header">
+    <button class="back-button" (click)="goBack()">← Volver</button>
+    <h2>{{ careerName || 'Tu malla' }}</h2>
+
+    <div class="header-actions">
+      <button class="action-button" (click)="toggleColorPanel()">🎨 Colores</button>
+      <button class="action-button" (click)="toggleRequisitesPanel()">📋 Requisitos</button>
+    </div>
+  </div>
+
+  <!-- Editor rápido de fondo -->
+  <div *ngIf="showColorPanel" class="background-editor">
+    <label>Color de fondo:</label>
+    <input type="color" [(ngModel)]="backgroundColor" (input)="onBackgroundChange()" />
+
+    <label style="margin-left: 12px;">Imagen de fondo (URL):</label>
+    <input
+      type="text"
+      [(ngModel)]="backgroundImageUrl"
+      (input)="onBackgroundChange()"
+      (blur)="saveMalla()"
+      placeholder="https://..."
+      style="width: 240px;"
+    />
+  </div>
+
+  <!-- Toolbar sticky con progreso y buscador -->
+  <div class="toolbar sticky">
+    <div class="brand" [title]="careerName">{{ careerName || 'Tu malla' }}</div>
+    <div class="progress" [attr.aria-label]="'Progreso ' + progressPct + '%'">
+      <div class="bar" [style.width.%]="progressPct"></div>
+    </div>
+    <div class="tools">
+      <input
+        type="search"
+        placeholder="Buscar ramo…"
+        [(ngModel)]="q"
+        (input)="onSearchChange()"
+        aria-label="Buscar ramo"
+      />
+      <button class="action-button" (click)="toggleDense()">{{ dense ? 'Normal' : 'Denso' }}</button>
+    </div>
+  </div>
+
+  <!-- Grid de semestres (horizontal, sin scroll). Agrega [class.dense] para compactar -->
+  <div
+    class="semesters grid-wrap"
+    [class.compact]="semesters.length >= 9"
+    [class.ultra]="semesters.length >= 12"
+    [class.dense]="dense"
+  >
+    <div
+      class="semester-column"
+      *ngFor="let semester of semesters; let i = index; trackBy: trackSem"
+      [ngStyle]="{
+        background: semesterBoxColors[i] || '#fff',
+        border: semesterBorders[i] || '1px solid #ececec'
+      }"
+    >
+      <div class="semester-header" [ngStyle]="{ 'background-color': semesterColors[i] || '#e3f2fd' }">
+        <h3>{{ i + 1 }}º Semestre</h3>
+        <div class="sum">{{ approvedIn(i) }} / {{ totalIn(i) }} ramos</div>
+
+        <div *ngIf="showColorPanel" class="color-panel">
+          <label>Color semestre:</label>
+          <input type="color" [(ngModel)]="semesterColors[i]" (input)="onSemesterColorChange(i)" />
+        </div>
+        <div *ngIf="showColorPanel" class="color-panel">
+          <label>Fondo tabla:</label>
+          <input type="color" [(ngModel)]="semesterBoxColors[i]" (input)="onSemesterBoxColorChange(i)" />
+        </div>
+      </div>
+
+      <ul>
+        <ng-container *ngFor="let subject of semester.subjects; let j = index">
+          <li
+            *ngIf="subject && subject.trim() && visible(i, j)"
+            [class.done]="isTachado(i, j)"
+            [class.locked]="!isTachado(i, j) && !canTachar(i, j)"
+           [ngStyle]="{ 'background-color': (subjectColors[i] && subjectColors[i][j]) || '#fff' }"
+            role="button"
+            tabindex="0"
+            (click)="isTachado(i, j) ? toggleTachado(i, j) : (canTachar(i, j) ? toggleTachado(i, j) : null)"
+            (keydown.enter)="isTachado(i, j) ? toggleTachado(i, j) : (canTachar(i, j) ? toggleTachado(i, j) : null)"
+            (keydown.space)="isTachado(i, j) ? toggleTachado(i, j) : (canTachar(i, j) ? toggleTachado(i, j) : null)"
+            [attr.title]="prereqText(i, j)"
+          >
+            <div class="row">
+              <span class="dot" aria-hidden="true"></span>
+              <span class="name">{{ subject }}</span>
+              <span class="chip" *ngIf="creditsMap[subject]">{{ creditsMap[subject] }} cr.</span>
+            </div>
+
+            <div *ngIf="showColorPanel && subjectColors[i]" class="color-picker">
+              <input type="color" [(ngModel)]="subjectColors[i][j]" (input)="onSubjectColorChange(i, j)" />
+            </div>
+
+            <div *ngIf="showRequisitesPanel" class="requisite-editor">
+              <label>Prerrequisitos:</label>
+              <input [(ngModel)]="editablePrerequisites[i + '-' + j]" (blur)="updateRequisites(i, j)" />
+              <small
+                *ngIf="editablePrerequisites[i + '-' + j] && !isValidPrerequisiteFormat(editablePrerequisites[i + '-' + j])"
+                style="color: red"
+              >
+                Formato incorrecto. Ej: 0-2,1-3 o Álgebra 1
+              </small>
+            </div>
+
+            <small class="hint" *ngIf="!isTachado(i, j) && !canTachar(i, j)">
+              Debes aprobar: {{ prereqText(i, j) }}
+            </small>
+          </li>
+        </ng-container>
+      </ul>
+    </div>
+  </div>
+</div>
