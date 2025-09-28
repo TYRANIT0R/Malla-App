@@ -27,12 +27,18 @@ export class VisualComponent implements OnInit, OnDestroy {
   semesters: { subjects: string[] }[] = [];
   loaded = false;
 
+  // UI
   q = '';
   dense = false;
 
+  // Tamaño (zoom interno)
+  zoomLevel = 100;        // 90 | 100 | 110 | 120
+  zoomClass = 'scale-100';
+
+  // Datos de malla / colores / fondo
   tachados: Set<string> = new Set();
   semesterColors: string[] = [];
-  subjectColors: string[][] = []; // en memoria seguirá siendo 2D
+  subjectColors: string[][] = []; // en memoria 2D
   semesterBorders: string[] = [];
   backgroundColor = '#ffffff';
   backgroundImageUrl = '';
@@ -82,10 +88,28 @@ export class VisualComponent implements OnInit, OnDestroy {
   }
 
   // Reconstruye el 2D en memoria usando el mapa guardado
-  private applyColorMap(colorMap: Record<string, string> | undefined) {
+  private applyColorMap(colorMap?: Record<string, string>) {
     this.subjectColors = this.semesters.map((s, i) =>
       s.subjects.map((_, j) => (colorMap?.[`${i}-${j}`] || '#ffffff'))
     );
+  }
+
+  /* =========================
+     Zoom helpers
+  ========================= */
+  private mapZoomToClass(v: number): string {
+    const r = Math.round(v / 10) * 10; // 90,100,110,120
+    switch (r) {
+      case 90:  return 'scale-90';
+      case 110: return 'scale-110';
+      case 120: return 'scale-120';
+      default:  return 'scale-100';
+    }
+  }
+  updateZoom(persist: boolean = true) {
+    this.zoomLevel = Math.min(120, Math.max(90, Math.round(this.zoomLevel)));
+    this.zoomClass = this.mapZoomToClass(this.zoomLevel);
+    if (persist) this.saveMalla();
   }
 
   /* =========================
@@ -115,14 +139,19 @@ export class VisualComponent implements OnInit, OnDestroy {
         this.prerequisites = data['prerequisites'] || {};
         this.editablePrerequisites = { ...this.prerequisites };
 
-        // NUEVO: reconstruir subjectColors desde subjectColorsMap
-        const colorMap: Record<string, string> | undefined =
-          data['subjectColorsMap'] || undefined;
-
+        // Reconstruir subjectColors desde subjectColorsMap
+        const colorMap: Record<string, string> | undefined = data['subjectColorsMap'] || undefined;
         this.applyColorMap(colorMap);
+
+        // Restaurar zoom
+        if (typeof data['zoomLevel'] === 'number') {
+          this.zoomLevel = data['zoomLevel'];
+        }
+        this.updateZoom(false); // aplica clase sin guardar
       } else {
         // Sin doc: inicializa subjectColors acorde a semesters
         this.applyColorMap(undefined);
+        this.updateZoom(false);
       }
 
       this.loaded = true;
@@ -140,7 +169,7 @@ export class VisualComponent implements OnInit, OnDestroy {
 
   @HostListener('window:beforeunload', ['$event'])
   onBeforeUnload(_e: BeforeUnloadEvent) {
-    // best-effort, ya guardamos inmediato en handlers.
+    // best-effort
   }
 
   /* =========================
@@ -237,12 +266,13 @@ export class VisualComponent implements OnInit, OnDestroy {
       semesters: this.semesters,                 // array de objetos -> OK
       tachados: Array.from(this.tachados),       // array simple -> OK
       semesterColors: this.semesterColors,       // array simple -> OK
-      subjectColorsMap,                          // <--- NUEVO: mapa plano
+      subjectColorsMap,                          // mapa plano
       semesterBoxColors: this.semesterBoxColors, // array simple -> OK
       semesterBorders: this.semesterBorders,     // array simple -> OK
       backgroundColor: this.backgroundColor,
       backgroundImageUrl: this.backgroundImageUrl,
       prerequisites: this.prerequisites,         // mapa -> OK
+      zoomLevel: this.zoomLevel,                 // <-- guardar preferencia de tamaño
       lastSavedAt: new Date().toISOString(),
     };
 
@@ -255,5 +285,8 @@ export class VisualComponent implements OnInit, OnDestroy {
     }
   }
 
+  /* =========================
+     ngFor trackBy
+  ========================= */
   trackSem = (_: number, s: { subjects: string[] }) => s;
 }

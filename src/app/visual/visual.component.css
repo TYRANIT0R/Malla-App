@@ -16,7 +16,19 @@ html, body { overflow-x: hidden; }
 .back-button { background: #f44336; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; }
 
 /* Toolbar sticky */
-.toolbar.sticky{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.85);backdrop-filter:saturate(1.2) blur(6px);padding:8px 16px;margin:-8px 0 16px;border-radius:12px;display:flex;gap:12px;align-items:center}
+.toolbar.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255,255,255,.85);
+  backdrop-filter: saturate(1.2) blur(6px);
+  padding: 8px 16px;
+  margin: -8px 0 16px;
+  border-radius: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center
+}
 .brand{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:24ch}
 .tools{display:flex;gap:8px;align-items:center}
 .tools input[type="search"]{height:34px;border:1px solid #e0e0e0;border-radius:8px;padding:0 10px;min-width:200px}
@@ -55,6 +67,7 @@ html, body { overflow-x: hidden; }
   box-shadow: 0 2px 8px rgba(0,0,0,.04);
   padding: 12px;
   min-width: 0;
+  transition: transform .2s ease;
 }
 .semester-header {
   padding: 12px;
@@ -99,3 +112,19 @@ li.locked .dot{background:#ef9a9a}
 .loader { height: 100vh; display: flex; justify-content: center; align-items: center; }
 .spinner { border: 6px solid #f3f3f3; border-top: 6px solid #2196f3; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
 @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+
+/* ---- NUEVO: Escala ajustable (simula zoom interno) ---- */
+.scale-90 { transform: scale(0.9); transform-origin: top center; }
+.scale-100 { transform: scale(1); transform-origin: top center; }
+.scale-110 { transform: scale(1.1); transform-origin: top center; }
+.scale-120 { transform: scale(1.2); transform-origin: top center; }
+
+/* Contenedor para el slider */
+.zoom-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.zoom-control input[type="range"] {
+  width: 120px;
+}
