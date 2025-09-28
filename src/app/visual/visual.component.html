@@ -60,30 +60,29 @@
         {{ dense ? 'Normal' : 'Denso' }}
       </button>
 
-      <!-- Control de tamaño (zoom interno) -->
+      <!-- Control de tamaño (zoom real por CSS variables) -->
       <div class="zoom-control">
         <label for="zoom">Tamaño:</label>
         <input
           id="zoom"
           type="range"
-          min="90"
-          max="120"
-          step="10"
+          min="0.8"
+          max="1.4"
+          step="0.05"
           [(ngModel)]="zoomLevel"
           (input)="updateZoom()"
         />
-        <span style="min-width:48px; text-align:center;">{{ zoomLevel }}%</span>
+        <span style="min-width:48px; text-align:center;">{{ (zoomLevel*100) | number:'1.0-0' }}%</span>
       </div>
     </div>
   </div>
 
-  <!-- Grid de semestres (horizontal, sin scroll). Agrega [class.dense] para compactar -->
+  <!-- Grid de semestres -->
   <div
     class="semesters grid-wrap"
     [class.compact]="semesters.length >= 9"
     [class.ultra]="semesters.length >= 12"
     [class.dense]="dense"
-    [ngClass]="zoomClass"
   >
     <div
       class="semester-column"
